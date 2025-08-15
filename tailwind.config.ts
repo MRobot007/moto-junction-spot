@@ -52,6 +52,14 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Bikers Portal Colors
+				steel: 'hsl(var(--steel))',
+				chrome: 'hsl(var(--chrome))',
+				amber: 'hsl(var(--amber))',
+				ember: 'hsl(var(--ember))',
+				obsidian: 'hsl(var(--obsidian))',
+				charcoal: 'hsl(var(--charcoal))',
+				iron: 'hsl(var(--iron))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -62,6 +70,19 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				}
+			},
+			backgroundImage: {
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-steel': 'var(--gradient-steel)',
+			},
+			boxShadow: {
+				'glow': 'var(--shadow-glow)',
+				'chrome': 'var(--shadow-chrome)',
+				'deep': 'var(--shadow-deep)',
+			},
+			transitionTimingFunction: {
+				'steel': 'var(--transition-steel)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
