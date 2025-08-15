@@ -59,6 +59,22 @@ All colors MUST be HSL.
 
     /* Animations */
     --transition-steel: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-premium: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* 3D Effects */
+    --perspective: 1000px;
+    --depth-near: translateZ(50px);
+    --depth-mid: translateZ(25px);
+    --depth-far: translateZ(-25px);
+
+    /* Enhanced Shadows for 3D */
+    --shadow-3d: 0 25px 50px -12px hsl(var(--obsidian) / 0.8);
+    --shadow-hover: 0 35px 60px -12px hsl(var(--amber) / 0.4);
+    --shadow-premium: 0 40px 80px -20px hsl(var(--obsidian) / 0.9);
+
+    /* Lighting Effects */
+    --gradient-3d-light: linear-gradient(135deg, hsl(var(--chrome) / 0.1), transparent);
+    --gradient-reflection: linear-gradient(180deg, transparent 50%, hsl(var(--chrome) / 0.05) 100%);
 
     --radius: 0.75rem;
 
@@ -127,4 +143,75 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* 3D Bike Card Animations */
+  .bike-card-3d {
+    perspective: var(--perspective);
+    transform-style: preserve-3d;
+  }
+
+  .bike-card-inner {
+    transform-style: preserve-3d;
+    transition: var(--transition-premium);
+    backface-visibility: hidden;
+  }
+
+  .bike-card-3d:hover .bike-card-inner {
+    transform: rotateY(8deg) rotateX(4deg) translateZ(20px);
+  }
+
+  .bike-image-container {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bike-image-3d {
+    transition: var(--transition-premium);
+    transform-origin: center;
+  }
+
+  .bike-card-3d:hover .bike-image-3d {
+    transform: scale(1.1) rotateY(5deg);
+  }
+
+  /* Premium Card Reflections */
+  .bike-card-reflection::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-reflection);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Parallax Background */
+  .parallax-bg {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  /* Text Reveal Animation */
+  .text-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .text-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Staggered Animation Delays */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
 }
