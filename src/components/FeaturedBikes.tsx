@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
+import GarageViewer from "./GarageViewer";
 import harleyStreet750 from "@/assets/harley-street-750.jpg";
 import yamahaR1 from "@/assets/yamaha-r1.jpg";
 import bmwR1250GS from "@/assets/bmw-r1250gs.jpg";
@@ -11,6 +12,8 @@ import kawasakiNinjaH2 from "@/assets/kawasaki-ninja-h2.jpg";
 
 const FeaturedBikes = () => {
   const [visibleCards, setVisibleCards] = useState<number[]>([]);
+  const [selectedBike, setSelectedBike] = useState<any>(null);
+  const [showGarage, setShowGarage] = useState(false);
 
   const bikes = [
     {
@@ -152,7 +155,22 @@ const FeaturedBikes = () => {
     }
   };
 
+  const handleViewDetails = (bike: any) => {
+    setSelectedBike(bike);
+    setShowGarage(true);
+  };
+
+  const handleCloseGarage = () => {
+    setShowGarage(false);
+    setSelectedBike(null);
+  };
+
+  const handleBikeChange = (bike: any) => {
+    setSelectedBike(bike);
+  };
+
   return (
+    <>
     <section id="bikes" className="relative py-20 bg-background overflow-hidden">
       {/* Parallax Background Elements */}
       <div className="absolute inset-0 opacity-5">
@@ -266,6 +284,7 @@ const FeaturedBikes = () => {
                   <div className="flex gap-2 pt-2">
                     <Button 
                       variant="outline" 
+                      onClick={() => handleViewDetails(bike)}
                       className="flex-1 border-iron text-foreground hover:bg-amber hover:text-obsidian hover:border-amber transition-all duration-500"
                     >
                       View Details
@@ -291,6 +310,17 @@ const FeaturedBikes = () => {
         </div>
       </div>
     </section>
+
+      {/* 3D Garage Viewer */}
+      {showGarage && selectedBike && (
+        <GarageViewer
+          bike={selectedBike}
+          bikes={bikes}
+          onClose={handleCloseGarage}
+          onBikeChange={handleBikeChange}
+        />
+      )}
+    </>
   );
 };
 
