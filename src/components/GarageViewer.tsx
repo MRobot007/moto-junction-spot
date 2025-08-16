@@ -333,11 +333,187 @@ const GarageViewer: React.FC<GarageViewerProps> = ({ bike, bikes, onClose, onBik
 
     bikeModelRef.current = bikeGroup;
 
-    // Entrance animation
-    gsap.fromTo(bikeGroup.scale, 
-      { x: 0, y: 0, z: 0 },
-      { x: 0.8, y: 0.8, z: 0.8, duration: 1.5, ease: "back.out(1.7)" }
-    );
+    // Epic entrance animation sequence
+    createEpicEntranceAnimation(bikeGroup, bikeData);
+  };
+
+  // Create epic entrance animation
+  const createEpicEntranceAnimation = (bikeGroup: THREE.Group, bikeData: BikeData) => {
+    // Initial state - bike appears from above with dramatic effects
+    bikeGroup.position.set(0, 15, 0);
+    bikeGroup.rotation.set(0, 0, Math.PI * 0.1);
+    bikeGroup.scale.set(0, 0, 0);
+
+    // Create particle explosion effect
+    createParticleExplosion(bikeGroup.position);
+
+    // Main entrance sequence
+    const tl = gsap.timeline();
+
+    // Phase 1: Dramatic drop with scale
+    tl.to(bikeGroup.scale, {
+      x: 1.2, y: 1.2, z: 1.2,
+      duration: 0.8,
+      ease: "power2.out"
+    })
+    .to(bikeGroup.position, {
+      y: 0.5,
+      duration: 1.2,
+      ease: "bounce.out"
+    }, 0)
+    .to(bikeGroup.rotation, {
+      z: 0,
+      duration: 1.0,
+      ease: "power2.out"
+    }, 0.2);
+
+    // Phase 2: Settle and showcase
+    tl.to(bikeGroup.scale, {
+      x: 0.8, y: 0.8, z: 0.8,
+      duration: 0.6,
+      ease: "back.out(1.7)"
+    })
+    .call(() => {
+      // Start continuous showcase animations
+      startShowcaseAnimations(bikeGroup);
+      // Add dynamic lighting effects
+      createDynamicLighting(bikeGroup);
+    });
+
+    // Add screen shake effect
+    if (cameraRef.current) {
+      gsap.to(cameraRef.current.position, {
+        x: "+=0.5",
+        duration: 0.1,
+        yoyo: true,
+        repeat: 5,
+        ease: "power2.inOut"
+      });
+    }
+  };
+
+  // Create particle explosion effect
+  const createParticleExplosion = (position: THREE.Vector3) => {
+    const particleCount = 50;
+    const particles: THREE.Mesh[] = [];
+
+    for (let i = 0; i < particleCount; i++) {
+      const particleGeometry = new THREE.SphereGeometry(0.05, 4, 4);
+      const particleMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color().setHSL(Math.random(), 1, 0.5),
+        transparent: true,
+        opacity: 1
+      });
+
+      const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+      particle.position.copy(position);
+      
+      const velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 10,
+        Math.random() * 5,
+        (Math.random() - 0.5) * 10
+      );
+
+      sceneRef.current?.add(particle);
+      particles.push(particle);
+
+      // Animate particles
+      gsap.to(particle.position, {
+        x: position.x + velocity.x,
+        y: position.y + velocity.y,
+        z: position.z + velocity.z,
+        duration: 2,
+        ease: "power2.out"
+      });
+
+      gsap.to(particle.material, {
+        opacity: 0,
+        duration: 2,
+        ease: "power2.out",
+        onComplete: () => {
+          sceneRef.current?.remove(particle);
+          particle.geometry.dispose();
+          (particle.material as THREE.Material).dispose();
+        }
+      });
+    }
+  };
+
+  // Start continuous showcase animations
+  const startShowcaseAnimations = (bikeGroup: THREE.Group) => {
+    // Gentle floating animation
+    gsap.to(bikeGroup.position, {
+      y: "+=0.3",
+      duration: 3,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut"
+    });
+
+    // Subtle rotation for dynamic presentation
+    gsap.to(bikeGroup.rotation, {
+      y: "+=0.2",
+      duration: 8,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut"
+    });
+
+    // Scale breathing effect
+    gsap.to(bikeGroup.scale, {
+      x: "+=0.05", y: "+=0.05", z: "+=0.05",
+      duration: 4,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut"
+    });
+  };
+
+  // Create dynamic lighting effects
+  const createDynamicLighting = (bikeGroup: THREE.Group) => {
+    // Create spotlight that follows the bike
+    const dynamicLight = new THREE.SpotLight(0xffffff, 3);
+    dynamicLight.position.set(5, 10, 5);
+    dynamicLight.target = bikeGroup;
+    dynamicLight.castShadow = true;
+    sceneRef.current?.add(dynamicLight);
+
+    // Animate the spotlight
+    gsap.to(dynamicLight.position, {
+      x: -5,
+      duration: 6,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut"
+    });
+
+    // Color-changing rim lights
+    const rimLight1 = new THREE.PointLight(0x00ffff, 2, 20);
+    const rimLight2 = new THREE.PointLight(0xff0066, 2, 20);
+    
+    rimLight1.position.set(-8, 3, 0);
+    rimLight2.position.set(8, 3, 0);
+    
+    sceneRef.current?.add(rimLight1);
+    sceneRef.current?.add(rimLight2);
+
+    // Animate rim lights
+    gsap.to(rimLight1, {
+      intensity: 0.5,
+      duration: 2,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut"
+    });
+
+    gsap.to(rimLight2, {
+      intensity: 0.5,
+      duration: 2,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut",
+      delay: 1
+    });
   };
 
   // Create simplified bike geometry
@@ -399,6 +575,52 @@ const GarageViewer: React.FC<GarageViewerProps> = ({ bike, bikes, onClose, onBik
     exhaust.rotation.z = Math.PI / 2;
     exhaust.castShadow = true;
     group.add(exhaust);
+
+    // Add glowing elements for premium effect
+    addGlowingElements(group, bikeData);
+  };
+
+  // Add glowing elements to bike
+  const addGlowingElements = (group: THREE.Group, bikeData: BikeData) => {
+    // Headlight glow
+    const headlightGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+    const headlightMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.8
+    });
+    const headlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
+    headlight.position.set(1.5, 1.2, 0);
+    group.add(headlight);
+
+    // Taillight glow
+    const taillightGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+    const taillightMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff0000,
+      transparent: true,
+      opacity: 0.9
+    });
+    const taillight = new THREE.Mesh(taillightGeometry, taillightMaterial);
+    taillight.position.set(-1.5, 1.0, 0);
+    group.add(taillight);
+
+    // Animate glowing elements
+    gsap.to(headlightMaterial, {
+      opacity: 0.3,
+      duration: 1.5,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut"
+    });
+
+    gsap.to(taillightMaterial, {
+      opacity: 0.4,
+      duration: 1.2,
+      yoyo: true,
+      repeat: -1,
+      ease: "sine.inOut",
+      delay: 0.5
+    });
   };
 
   // Get bike color based on name
@@ -422,10 +644,11 @@ const GarageViewer: React.FC<GarageViewerProps> = ({ bike, bikes, onClose, onBik
   const animate = useCallback(() => {
     if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
 
-    // Camera orbit animation
-    const time = Date.now() * 0.0005;
-    cameraRef.current.position.x = Math.cos(time) * 15;
-    cameraRef.current.position.z = Math.sin(time) * 15;
+    // Subtle camera movement for cinematic effect
+    const time = Date.now() * 0.0002;
+    cameraRef.current.position.x = Math.cos(time) * 12 + Math.sin(time * 2) * 2;
+    cameraRef.current.position.z = Math.sin(time) * 12 + Math.cos(time * 1.5) * 3;
+    cameraRef.current.position.y = 5 + Math.sin(time * 0.5) * 1;
     cameraRef.current.lookAt(0, 2, 0);
 
     rendererRef.current.render(sceneRef.current, cameraRef.current);
@@ -448,28 +671,84 @@ const GarageViewer: React.FC<GarageViewerProps> = ({ bike, bikes, onClose, onBik
 
     const newBike = bikes[newIndex];
 
-    // Transition animation
+    // Epic transition animation
     if (bikeModelRef.current) {
-      gsap.to(bikeModelRef.current.position, {
-        x: direction === 'next' ? -10 : 10,
-        duration: 0.5,
-        ease: "power2.in",
-        onComplete: () => {
-          // Remove old bike and load new one
-          if (bikeModelRef.current && platformRef.current) {
-            platformRef.current.remove(bikeModelRef.current);
-          }
-          
-          loadBikeModel(sceneRef.current!, newBike);
-          onBikeChange(newBike);
-          setCurrentBikeIndex(newIndex);
-          
-          setTimeout(() => {
-            setIsTransitioning(false);
-          }, 1000);
-        }
-      });
+      createEpicTransition(bikeModelRef.current, direction, newBike, newIndex);
     }
+  };
+
+  // Create epic transition between bikes
+  const createEpicTransition = (currentBike: THREE.Group, direction: 'prev' | 'next', newBike: any, newIndex: number) => {
+    const tl = gsap.timeline();
+
+    // Phase 1: Dramatic exit
+    tl.to(currentBike.position, {
+      x: direction === 'next' ? -15 : 15,
+      y: 8,
+      duration: 0.8,
+      ease: "power2.in"
+    })
+    .to(currentBike.rotation, {
+      z: direction === 'next' ? -Math.PI * 0.3 : Math.PI * 0.3,
+      duration: 0.8,
+      ease: "power2.in"
+    }, 0)
+    .to(currentBike.scale, {
+      x: 0, y: 0, z: 0,
+      duration: 0.6,
+      ease: "power2.in"
+    }, 0.2);
+
+    // Phase 2: Screen flash effect
+    tl.call(() => {
+      createScreenFlash();
+    }, null, 0.8);
+
+    // Phase 3: Load new bike
+    tl.call(() => {
+      // Remove old bike
+      if (platformRef.current) {
+        platformRef.current.remove(currentBike);
+      }
+      
+      // Load new bike with epic entrance
+      loadBikeModel(sceneRef.current!, newBike);
+      onBikeChange(newBike);
+      setCurrentBikeIndex(newIndex);
+      
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 2000);
+    }, null, 1.0);
+  };
+
+  // Create screen flash effect
+  const createScreenFlash = () => {
+    const flashDiv = document.createElement('div');
+    flashDiv.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle, rgba(255,191,0,0.8) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    document.body.appendChild(flashDiv);
+
+    gsap.fromTo(flashDiv, 
+      { opacity: 0 },
+      { 
+        opacity: 1, 
+        duration: 0.1,
+        yoyo: true,
+        repeat: 1,
+        onComplete: () => {
+          document.body.removeChild(flashDiv);
+        }
+      }
+    );
   };
 
   // Handle window resize
